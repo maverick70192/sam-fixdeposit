@@ -169,7 +169,7 @@ jobs:
           use-installer: true
       - uses: actions/download-artifact@v3
         with:
-          name: packaged-dev.yaml
+          name: packaged-testing.yaml
 
       - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v1-node16
