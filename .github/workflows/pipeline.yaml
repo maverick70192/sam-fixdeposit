@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: |
-          # trigger the tests here
+          dotnet test -c Release --no-restore
 
   delete-feature:
     if: startsWith(github.event.ref, 'feature') && github.event_name == 'delete'
