@@ -75,7 +75,7 @@ jobs:
     # https://github.com/actions/setup-python
     # https://github.com/aws-actions/configure-aws-credentials#notice-node12-deprecation-warning
     if: startsWith(github.ref, 'refs/heads/feature')
-    needs: [test]
+    needs: [unit-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -105,7 +105,7 @@ jobs:
 
   build-and-package:
     if: github.ref == 'refs/heads/main'
-    needs: [test]
+    needs: [unit-test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -158,7 +158,7 @@ jobs:
           name: packaged-prod.yaml
           path: packaged-prod.yaml
 
-  deploy-testing:
+  deploy-dev:
     if: github.ref == 'refs/heads/main'
     needs: [build-and-package]
     runs-on: ubuntu-latest
@@ -169,18 +169,18 @@ jobs:
           use-installer: true
       - uses: actions/download-artifact@v3
         with:
-          name: packaged-testing.yaml
+          name: packaged-dev.yaml
 
-      - name: Assume the testing pipeline user role
+      - name: Assume the dev pipeline user role
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: ${{ env.TESTING_REGION }}
           role-to-assume: ${{ env.TESTING_PIPELINE_EXECUTION_ROLE }}
-          role-session-name: testing-deployment
+          role-session-name: dev-deployment
           role-duration-seconds: 3600
           role-skip-session-tagging: true
 
-      - name: Deploy to testing account
+      - name: Deploy to dev account
         run: |
           sam deploy --stack-name ${TESTING_STACK_NAME} \
             --template packaged-testing.yaml \
@@ -192,7 +192,7 @@ jobs:
 
   integration-test:
     if: github.ref == 'refs/heads/main'
-    needs: [deploy-testing]
+    needs: [deploy-dev]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
